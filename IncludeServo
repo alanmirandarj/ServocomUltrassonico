@@ -1,0 +1,61 @@
+<#include <Servo.h> 
+#define pinEcho 2
+#define pinTrig 3
+#define pinServo 8
+#define ABRE 130
+#define FECHA 170
+Servo garra;
+void enviaPulso();
+void medeDistancia();
+volatile unsigned long inicioPulso = 0;
+volatile float   distancia = 0 ;
+volatile int modo = -1;
+
+
+void setup() {
+  // put your setup code here, to run once:
+Serial.begin(9600);
+
+garra.attach(pinServo);
+garra.write(ABRE);
+
+pinMode(pinEcho, INPUT);
+pinMode(pinTrig, OUTPUT);
+digitalWrite (pinTrig, LOW);
+attachInterrupt (digitalPinToInterrupt(pinEcho), medeDistancia , CHANGE);
+
+
+
+
+
+
+}
+
+void loop() {
+  enviaPulso();
+  delay(25);
+if (distancia <17.5 && distancia >11.5)
+garra.write (FECHA);
+delay (1000);
+garra.write (ABRE);
+delay (500);
+
+}
+
+void medeDistancia(){
+  switch (modo) {
+    case 0: {
+      inicioPulso = micros();
+      modo = 1;
+      break;
+    }
+      case 1: {
+        distancia = (float)(micros() - inicioPulso) /58.3;// distancia em CM
+        inicioPulso = 0;
+        modo = -1;
+        break;
+      }
+    }
+
+
+}
